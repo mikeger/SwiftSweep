@@ -6,7 +6,7 @@ import Foundation
 import PackagePlugin
 
 @main
-struct SwiftSweepPlugin: BuildToolPlugin {
+struct SwiftSweepPlugin: CommandPlugin {
     private func run(_ executable: String, arguments: [String] = []) throws {
         let executableURL = URL(fileURLWithPath: executable)
 
@@ -22,22 +22,7 @@ struct SwiftSweepPlugin: BuildToolPlugin {
             throw "[ERROR] The plugin execution failed: \(process.terminationReason.rawValue) (\(process.terminationStatus))"
         }
     }
-
-    func createBuildCommands(
-        context: PackagePlugin.PluginContext,
-        target: any PackagePlugin.Target
-    ) async throws -> [PackagePlugin.Command] {
-        let outputDir = context.pluginWorkDirectory
-
-        return [.prebuildCommand(
-            displayName: "Searching unused symbols",
-            executable: try context.tool(named: "swift-sweep").path,
-            arguments: [context.package.directory.string, "--xcode-warnings"],
-            outputFilesDirectory: outputDir)]
-    }
-}
-
-extension SwiftSweepPlugin: CommandPlugin {
+    
     func performCommand(context: PluginContext, arguments: [String]) async throws {
         var argExtractor = ArgumentExtractor(arguments)
         let ignoreRegex = argExtractor.extractOption(named: "ignore-regex")

@@ -8,8 +8,12 @@ let products: [PackageDescription.Product] = [
         targets: ["swift-sweep"]
     ),
     .plugin(
-        name: "SwiftSweep",
-        targets: ["SwiftSweepPlugin"]
+        name: "SwiftSweepCommand",
+        targets: ["SwiftSweepCommandPlugin"]
+    ),
+    .plugin(
+        name: "SwiftSweepBuild",
+        targets: ["SwiftSweepBuildPlugin"]
     ),
 ]
 
@@ -29,13 +33,18 @@ let targets: [PackageDescription.Target] = [
         dependencies: ["SwiftSweepCore"]
     ),
     .plugin(
-        name: "SwiftSweepPlugin",
+        name: "SwiftSweepCommandPlugin",
         capability: .command(
             intent: .custom(
                 verb: "swift-sweep",
                 description: "Find unused symbols"
             )
         ),
+        dependencies: ["swift-sweep"]
+    ),
+    .plugin(
+        name: "SwiftSweepBuildPlugin",
+        capability: .buildTool(),
         dependencies: ["swift-sweep"]
     ),
 ]
