@@ -40,18 +40,15 @@ struct SwiftSweepBuildPlugin: BuildToolPlugin {
 #if canImport(XcodeProjectPlugin)
 import XcodeProjectPlugin
 
-extension SwiftSweepBuildPlugin: XcodeCommandPlugin {
-    func performCommand(context: XcodePluginContext, arguments: [String]) throws {
-        var argExtractor = ArgumentExtractor(arguments)
-        let ignoreRegex = argExtractor.extractOption(named: "ignore-regex")
-        
-        let tool = try context.tool(named: "swift-sweep")
-        var newArguments = [context.xcodeProject.directory.string, "--xcode-warnings"]
-        if !ignoreRegex.isEmpty {
-            newArguments.append("--ignore-regex")
-            newArguments.append(contentsOf: ignoreRegex)
-        }
-        try run(tool.path.string, arguments: newArguments)
+extension SwiftSweepBuildPlugin: XcodeBuildToolPlugin {
+    func createBuildCommands(context: XcodeProjectPlugin.XcodePluginContext, target: XcodeProjectPlugin.XcodeTarget) throws -> [PackagePlugin.Command] {
+        let outputDir = context.pluginWorkDirectory
+
+        return [.prebuildCommand(
+            displayName: "Searching unused symbols",
+            executable: try context.tool(named: "swift-sweep").path,
+            arguments: [context.xcodeProject.directory.string, "--xcode-warnings"],
+            outputFilesDirectory: outputDir)]
     }
 }
 
