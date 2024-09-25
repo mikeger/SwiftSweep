@@ -24,9 +24,15 @@ struct SwiftSweepPlugin: CommandPlugin {
     }
 
     func performCommand(context: PluginContext, arguments: [String]) async throws {
+        var argExtractor = ArgumentExtractor(arguments)
+        let ignoreRegex = argExtractor.extractOption(named: "ignore-regex")
+
         let tool = try context.tool(named: "swift-sweep")
         var newArguments = [context.package.directory.string, "--xcode-warnings"]
-        newArguments.append(contentsOf: arguments)
+        if !ignoreRegex.isEmpty {
+            newArguments.append("--ignore-regex")
+            newArguments.append(contentsOf: ignoreRegex)
+        }
         try run(tool.path.string, arguments: newArguments)
     }
 }
@@ -36,9 +42,15 @@ struct SwiftSweepPlugin: CommandPlugin {
 
     extension SwiftSweepPlugin: XcodeCommandPlugin {
         func performCommand(context: XcodePluginContext, arguments: [String]) throws {
+            var argExtractor = ArgumentExtractor(arguments)
+            let ignoreRegex = argExtractor.extractOption(named: "ignore-regex")
+
             let tool = try context.tool(named: "swift-sweep")
             var newArguments = [context.xcodeProject.directory.string, "--xcode-warnings"]
-            newArguments.append(contentsOf: arguments)
+            if !ignoreRegex.isEmpty {
+                newArguments.append("--ignore-regex")
+                newArguments.append(contentsOf: ignoreRegex)
+            }
             try run(tool.path.string, arguments: newArguments)
         }
     }
