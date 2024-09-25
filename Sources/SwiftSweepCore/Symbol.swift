@@ -8,11 +8,15 @@ import SwiftSyntax
 
 public struct Symbol {
     public let name: String
+    public let line: Int
+    public let column: Int
     public let definedIn: String
     
-    init(name: String, definedIn: String) {
+    init(name: String, definedIn: String, line: Int, column: Int) {
         self.name = name
         self.definedIn = definedIn
+        self.line = line
+        self.column = column
     }
     
     func isUsed(allFiles: [String], fileProvider: FileProvider, verbose: Bool) -> Bool {
@@ -61,35 +65,74 @@ public struct Symbol {
         
         // Create a visitor to traverse the syntax tree
         class SymbolVisitor: SyntaxVisitor {
-            var symbols: [String] = []
+            var symbols: [Symbol] = []
+            let filePath: String
+            let fileContents: String
             
+            init(filePath: String, fileContents: String) {
+                self.filePath = filePath
+                self.fileContents = fileContents
+                super.init(viewMode: .sourceAccurate)
+            }
+
             override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
-                let functionName = node.name.text
-                symbols.append(functionName)
+                
+                let (line, column) = fileContents.lineAndColumn(at: node.position) ?? (0, 0)
+                let symbol = Symbol(
+                    name: node.name.text,
+                    definedIn: filePath,
+                    line: line,
+                    column: column
+                )
+                symbols.append(symbol)
                 return .skipChildren
             }
             
             override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-                let structName = node.name.text
-                symbols.append(structName)
+                let (line, column) = fileContents.lineAndColumn(at: node.position) ?? (0, 0)
+                let symbol = Symbol(
+                    name: node.name.text,
+                    definedIn: filePath,
+                    line: line,
+                    column: column
+                )
+                symbols.append(symbol)
                 return .skipChildren
             }
             
             override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-                let className = node.name.text
-                symbols.append(className)
+                let (line, column) = fileContents.lineAndColumn(at: node.position) ?? (0, 0)
+                let symbol = Symbol(
+                    name: node.name.text,
+                    definedIn: filePath,
+                    line: line,
+                    column: column
+                )
+                symbols.append(symbol)
                 return .skipChildren
             }
             
             override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
-                let enumName = node.name.text
-                symbols.append(enumName)
+                let (line, column) = fileContents.lineAndColumn(at: node.position) ?? (0, 0)
+                let symbol = Symbol(
+                    name: node.name.text,
+                    definedIn: filePath,
+                    line: line,
+                    column: column
+                )
+                symbols.append(symbol)
                 return .skipChildren
             }
             
             override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
-                let protocolName = node.name.text
-                symbols.append(protocolName)
+                let (line, column) = fileContents.lineAndColumn(at: node.position) ?? (0, 0)
+                let symbol = Symbol(
+                    name: node.name.text,
+                    definedIn: filePath,
+                    line: line,
+                    column: column
+                )
+                symbols.append(symbol)
                 return .skipChildren
             }
             
@@ -97,18 +140,46 @@ public struct Symbol {
                 for binding in node.bindings {
                     if let identifierPattern = binding.pattern.as(IdentifierPatternSyntax.self) {
                         let variableName = identifierPattern.identifier.text
-                        symbols.append(variableName)
+                        let (line, column) = fileContents.lineAndColumn(at: node.position) ?? (0, 0)
+                        let symbol = Symbol(
+                            name: variableName,
+                            definedIn: filePath,
+                            line: line,
+                            column: column
+                        )
+                        symbols.append(symbol)
                     }
                 }
                 return .skipChildren
             }
-            
             // Add more overrides if you want to capture other symbols like extensions, typealiases, etc.
         }
         
-        let visitor = SymbolVisitor(viewMode: .sourceAccurate)
+        let visitor = SymbolVisitor(filePath: file, fileContents: source)
         visitor.walk(sourceFile)
         
-        return visitor.symbols.map { Symbol(name: $0, definedIn: file) }
+        return visitor.symbols
+    }
+}
+
+extension String {
+    func lineAndColumn(at position: AbsolutePosition) -> (line: Int, column: Int)? {
+        var line = 1
+        var column = 1
+        var currentIndex = self.startIndex
+
+        for index in self.indices {
+            if currentIndex == self.index(self.startIndex, offsetBy: position.utf8Offset) {
+                return (line, column)
+            }
+            if self[index] == "\n" {
+                line += 1
+                column = 1
+            } else {
+                column += 1
+            }
+            currentIndex = self.index(after: currentIndex)
+        }
+        return nil
     }
 }

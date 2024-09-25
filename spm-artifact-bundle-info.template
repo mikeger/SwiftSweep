@@ -1,0 +1,15 @@
+{
+    "schemaVersion": "1.0",
+    "artifacts": {
+        "swift-sweep": {
+            "version": "__VERSION__",
+            "type": "executable",
+            "variants": [
+                {
+                    "path": "swift-sweep/bin/swift-sweep",
+                    "supportedTriples": ["x86_64-apple-macosx", "arm64-apple-macosx"]
+                }
+            ]
+        }
+    }
+}

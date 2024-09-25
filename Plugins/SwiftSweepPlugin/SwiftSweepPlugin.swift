@@ -24,10 +24,10 @@ struct SwiftSweepPlugin: CommandPlugin {
     }
 
     func performCommand(context: PluginContext, arguments: [String]) async throws {
-        FileManager().changeCurrentDirectoryPath(context.package.directory.string)
         let tool = try context.tool(named: "swift-sweep")
-
-        try run(tool.path.string, arguments: arguments)
+        var newArguments = [context.package.directory.string, "--xcode-warnings"]
+        newArguments.append(contentsOf: arguments)
+        try run(tool.path.string, arguments: newArguments)
     }
 }
 
@@ -36,11 +36,10 @@ struct SwiftSweepPlugin: CommandPlugin {
 
     extension SwiftSweepPlugin: XcodeCommandPlugin {
         func performCommand(context: XcodePluginContext, arguments: [String]) throws {
-            FileManager().changeCurrentDirectoryPath(context.xcodeProject.directory.string)
-
             let tool = try context.tool(named: "swift-sweep")
-
-            try run(tool.path.string, arguments: arguments)
+            var newArguments = [context.xcodeProject.directory.string, "--xcode-warnings"]
+            newArguments.append(contentsOf: arguments)
+            try run(tool.path.string, arguments: newArguments)
         }
     }
 #endif

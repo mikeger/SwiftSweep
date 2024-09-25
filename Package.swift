@@ -2,10 +2,6 @@
 
 import PackageDescription
 
-let sharedSettings: [SwiftSetting] = [
-    .unsafeFlags(["-warnings-as-errors"]),
-]
-
 let products: [PackageDescription.Product] = [
     .executable(
         name: "swift-sweep",
@@ -21,15 +17,13 @@ let targets: [PackageDescription.Target] = [
     .executableTarget(
         name: "swift-sweep",
         dependencies: ["SwiftSweepCore",
-                       .product(name: "ArgumentParser", package: "swift-argument-parser")],
-        swiftSettings: sharedSettings
+                       .product(name: "ArgumentParser", package: "swift-argument-parser")]
     ),
     .target(name: "SwiftSweepCore",
             dependencies: [
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
-            ],
-            swiftSettings: sharedSettings),
+            ]),
     .testTarget(
         name: "SwiftSweepCoreTests",
         dependencies: ["SwiftSweepCore"]
