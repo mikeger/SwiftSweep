@@ -6,7 +6,7 @@ import Foundation
 import PackagePlugin
 
 @main
-struct SwiftSweepPlugin: CommandPlugin {
+struct SwiftSweepCommandPlugin: CommandPlugin {
     private func run(_ executable: String, arguments: [String] = []) throws {
         let executableURL = URL(fileURLWithPath: executable)
 
@@ -40,7 +40,7 @@ struct SwiftSweepPlugin: CommandPlugin {
 #if canImport(XcodeProjectPlugin)
     import XcodeProjectPlugin
 
-    extension SwiftSweepPlugin: XcodeCommandPlugin {
+    extension SwiftSweepCommandPlugin: XcodeCommandPlugin {
         func performCommand(context: XcodePluginContext, arguments: [String]) throws {
             var argExtractor = ArgumentExtractor(arguments)
             let ignoreRegex = argExtractor.extractOption(named: "ignore-regex")

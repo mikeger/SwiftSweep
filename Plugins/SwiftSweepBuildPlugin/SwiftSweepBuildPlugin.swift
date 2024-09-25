@@ -37,6 +37,26 @@ struct SwiftSweepBuildPlugin: BuildToolPlugin {
     }
 }
 
+#if canImport(XcodeProjectPlugin)
+import XcodeProjectPlugin
+
+extension SwiftSweepBuildPlugin: XcodeCommandPlugin {
+    func performCommand(context: XcodePluginContext, arguments: [String]) throws {
+        var argExtractor = ArgumentExtractor(arguments)
+        let ignoreRegex = argExtractor.extractOption(named: "ignore-regex")
+        
+        let tool = try context.tool(named: "swift-sweep")
+        var newArguments = [context.xcodeProject.directory.string, "--xcode-warnings"]
+        if !ignoreRegex.isEmpty {
+            newArguments.append("--ignore-regex")
+            newArguments.append(contentsOf: ignoreRegex)
+        }
+        try run(tool.path.string, arguments: newArguments)
+    }
+}
+
+#endif
+
 extension String: LocalizedError {
     public var errorDescription: String? { return self }
 }
