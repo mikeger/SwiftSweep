@@ -167,6 +167,7 @@ To continuously monitor for new unused symbols, you can set up a nightly job tha
 - **External Libraries:** The tool may incorrectly identify protocol methods from external libraries as unused.
 - **Reflection and Dynamic Usage:** Symbols used via reflection or dynamically constructed names may not be detected as used.
 - **False Positives:** Some symbols might be reported as unused even if they are in use due to analysis limitations.
+- **False Negatives:** The tool currently lacks the capability to distinguish between actual usage of a symbol and mere mentions of its name in the codebase. Consequently, if a symbol’s name appears anywhere—including in comments or string literals—it is considered as being used. This limitation can lead to the tool failing to identify unused symbols, especially for short or commonly used names that may frequently appear without representing functional usage.
 
 ---
 
